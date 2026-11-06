@@ -1,0 +1,28 @@
+# LeafGuard theme - "Organic Biophilic" design system (generated with ui-ux-pro-max-skill)
+# Earth green + harvest gold, Lora headings, Raleway body.
+# (Noto Kannada / Devanagari fallbacks are loaded by leafguard_plus/ui.py - Streamlit allows one web font per setting.)
+
+[theme]
+base = "light"
+primaryColor = "#15803D"
+backgroundColor = "#F0FDF4"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#14532D"
+linkColor = "#15803D"
+borderColor = "#BBF7D0"
+redColor = "#DC2626"
+greenColor = "#15803D"
+yellowColor = "#A16207"
+font = "Raleway:https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap"
+headingFont = "Lora:https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&display=swap"
+baseRadius = "0.9rem"
+buttonRadius = "0.75rem"
+chartCategoricalColors = ["#15803D", "#A16207", "#DC2626", "#0E7490", "#22C55E"]
+
+[theme.sidebar]
+backgroundColor = "#FFFFFF"
+borderColor = "#BBF7D0"
+
+[client]
+showSidebarNavigation = false
+toolbarMode = "minimal"

@@ -1,0 +1,6 @@
+{
+  "framework": "yolo",
+  "model_path": "models/best.pt",
+  "input_size": [640, 640],
+  "use_clip": true
+}

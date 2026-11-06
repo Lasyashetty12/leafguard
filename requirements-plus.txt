@@ -1,0 +1,2 @@
+# Extra package for the new features (install AFTER requirements.txt)
+gTTS          # spoken results in Kannada / Hindi / English (needs internet; otherwise the browser voice is used)

@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.DS_Store
+Thumbs.db
+
+# datasets are big - don't push them
+data/*
+!data/README.txt
+
+# generated reports (re-create with scripts/stress_test.py)
+reports/
+
+# Your models (best.pt 6 MB, model.pt 14 MB) are small enough for GitHub, so they ARE pushed.
+# Any model file over 100 MB must be left out or stored with Git LFS.
