@@ -177,10 +177,6 @@ button, [role="tab"], [role="radio"], a, label {{ cursor:pointer; }}
 # Pure CSS: scroll-driven animations (no JavaScript), hover states, entrance animations.
 # Everything is switched off for people who set "reduce motion" in their OS.
 MOTION_CSS = """<style>
-/* ---- long widget labels wrap instead of being cut off with "..." ---- */
-[data-testid="stCheckbox"] label, [data-testid="stCheckbox"] label *, [data-testid="stRadio"] label * {
-  white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
-[data-testid="stCheckbox"] label { align-items:flex-start; padding: 6px 0; }
 /* ---- page atmosphere ---- */
 [data-testid="stApp"] {
   background-image:
@@ -340,10 +336,7 @@ def sidebar():
         for path, label, ic in [("app.py", "Diagnose", ":material/eco:"),
                                 ("pages/1_Deep_Check.py", "Deep Check", ":material/biotech:"),
                                 ("pages/2_Fool_Me_Arena.py", "Fool Me Arena", ":material/target:"),
-                                ("pages/3_Live_Camera.py", "Live Camera", ":material/videocam:"),
-                                ("pages/4_Treatment_Plan.py", "Treatment Plan", ":material/healing:"),
-                                ("pages/5_Field_Scan.py", "Field Scan", ":material/grid_view:"),
-                                ("pages/6_Field_Diary.py", "Field Diary", ":material/menu_book:")]:
+                                ("pages/3_Live_Camera.py", "Live Camera", ":material/videocam:")]:
             try:
                 st.page_link(path, label=label, icon=ic)
             except Exception:  # e.g. when a page is run on its own
@@ -486,11 +479,3 @@ def features(items):
     cards = "".join(f"<div class='lg-feature'><div class='fi'>{icon(ic, 22, '#15803D')}</div>"
                     f"<b>{html.escape(t)}</b><span>{html.escape(x)}</span></div>" for ic, t, x in items)
     st.markdown(f"<div class='lg-features'>{cards}</div>", unsafe_allow_html=True)
-
-
-def link(page, label, ic=None, **kw):
-    """st.page_link that never crashes (e.g. when a page is opened on its own)."""
-    try:
-        st.page_link(page, label=label, icon=ic or kw.get("icon"))
-    except Exception:
-        pass
