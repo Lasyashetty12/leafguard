@@ -53,3 +53,38 @@ leafguard_plus/  stability.py  counterfactual.py  severity.py  decide.py
 ```
 
 Translations were written for this demo. Ask a native Kannada / Hindi speaker to review them before real use.
+
+---
+
+# Round 2: from diagnosis to action
+
+## 🩹 Treatment Plan (`pages/4_Treatment_Plan.py`)
+
+Opens automatically with the disease and severity from your last diagnosis.
+
+- **Act-by urgency** from disease and severity (late blight is always "today").
+- **Do this today:** a tick-off checklist with a progress bar.
+- **Treatment options to discuss with your officer:** organic/biological and chemical active ingredients, plus a safe-spraying checklist and fungicide-rotation tip.
+- **No doses on purpose:** "follow the label or ask your officer / KVK". Doses vary by product, crop and region.
+- **Spray-weather check:** is it OK to spray now (wind, heat, rain in the next 4 h)? It also lists the next good spray windows.
+- **3-day disease-risk forecast** for the detected disease, from weather rules of thumb (e.g. late blight after ~10 h of >90% humidity at mild temperatures). Weather comes from Open-Meteo (free, no key, needs internet).
+- **Share on WhatsApp** with an agriculture officer, **download the plan**, **hear it** in Kannada/Hindi/English, **save to the Field Diary**.
+- Sources: TNAU Agritech, UC IPM, Ohio State VegNet (listed on the page).
+
+## 🗺️ Field Scan (`pages/5_Field_Scan.py`)
+
+Upload 10–30 photos from one field and get:
+
+- a field health score and the % of plants diseased
+- a breakdown of the photos
+- one decision for the whole field:
+  - **Treat the whole field** (≥ 20% diseased)
+  - **Spot-treat** (5–20%)
+  - **Keep monitoring**
+  - **Retake photos** (too few usable)
+
+It links to the treatment plan for the most common disease. Export the results as CSV or save them to the diary.
+
+## 📔 Field Diary (`pages/6_Field_Diary.py`)
+
+Every check-up per plot, with a severity chart over time and a trend verdict: *Improving / Steady / Getting worse* ("is the treatment working?"). Includes notes, photos, delete and CSV export. Stored in `reports/diary/` (not pushed to GitHub).

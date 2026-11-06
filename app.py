@@ -84,6 +84,12 @@ with tab_diag:
             st.info("No samples yet. Run: python scripts/make_samples.py")
 
     if rgb is None:
+        ui.features([
+            ("camera", "Refuses bad photos", "Blurry, dark or thumb-covered shots get 'retake', never a guess."),
+            ("ban", "Knows what a leaf is", "Coffee mugs, hands and screens are rejected before diagnosis."),
+            ("scan", "Ignores the background", "Only spots on the main leaf count, so sick leaves nearby can't fool it."),
+            ("flask", "Proves its answer", "Boxes, a self-doubt test and a hide-the-spots test show why."),
+        ])
         ui.card("How to take a good photo",
                 "<ul style='margin:0;padding-left:18px;line-height:1.8'>"
                 "<li>One leaf, filling most of the screen</li><li>Daylight, no harsh glare</li>"
@@ -92,6 +98,8 @@ with tab_diag:
     if rgb is not None:
         with st.spinner("Checking photo, finding leaf, asking the model, explaining ..."):
             r = guard.analyze(rgb, do_explain=explain_on, explain_baseline=explain_on and compare_on)
+        from leafguard_plus.shared import remember_diagnosis
+        remember_diagnosis(r, rgb)
 
         ui.pipeline_steps(r)
 
@@ -149,8 +157,11 @@ with tab_diag:
             cols = st.columns(2, gap="small")
             for k, (cap, im) in enumerate(imgs):
                 cols[k % 2].image(im, caption=cap, width="stretch")
+        if r["verdict"] == "DISEASED":
+            ui.link("pages/4_Treatment_Plan.py", "Get the treatment plan: what to do today, options, "
+                         "spray-weather check", ":material/healing:")
         if r["verdict"] in ("UNCERTAIN", "DISEASED"):
-            st.page_link("pages/1_Deep_Check.py", label="Open Deep Check: self-doubt test, proof, severity and voice", icon=":material/biotech:")
+            ui.link("pages/1_Deep_Check.py", "Open Deep Check: self-doubt test, proof, severity and voice", ":material/biotech:")
 
 # ---------------------------------------------------------------- proof
 with tab_proof:

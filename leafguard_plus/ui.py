@@ -72,6 +72,8 @@ _P = {
     "user": '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
     "dot": '<circle cx="12" cy="12" r="4" fill="currentColor"/>',
     "minus": '<path d="M5 12h14"/>',
+    "chevron_up": '<path d="m18 15-6-6-6 6"/>',
+    "sparkle": '<path d="M9.94 14.06 2 22"/><path d="m15 2 1.5 3.5L20 7l-3.5 1.5L15 12l-1.5-3.5L10 7l3.5-1.5z"/>',
 }
 
 
@@ -128,8 +130,8 @@ h1, h2, h3 {{ letter-spacing: -0.01em; }}
 .lg-checks {{ list-style:none; margin:0; padding:0; }}
 .lg-checks li {{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #ECFDF5; }}
 .lg-checks li:last-child {{ border-bottom:0; }}
-.lg-checks .nm {{ font-weight:600; flex:1; font-size:.95rem; }}
-.lg-checks .val {{ color:var(--lg-muted); font-size:.85rem; text-align:right; }}
+.lg-checks .nm {{ font-weight:600; flex:1; min-width:0; font-size:.95rem; line-height:1.3; }}
+.lg-checks .val {{ display:block; color:var(--lg-muted); font-weight:400; font-size:.8rem; margin-top:1px; }}
 
 /* pipeline steps (progress indicator) */
 .lg-steps {{ display:flex; gap:8px; flex-wrap:wrap; margin: 4px 0 16px 0; }}
@@ -171,9 +173,162 @@ button, [role="tab"], [role="radio"], a, label {{ cursor:pointer; }}
 .lg-brand .t {{ font-size:.75rem; color:var(--lg-muted); }}
 </style>"""
 
+# ---------------------------------------------------------------- motion layer
+# Pure CSS: scroll-driven animations (no JavaScript), hover states, entrance animations.
+# Everything is switched off for people who set "reduce motion" in their OS.
+MOTION_CSS = """<style>
+/* ---- long widget labels wrap instead of being cut off with "..." ---- */
+[data-testid="stCheckbox"] label, [data-testid="stCheckbox"] label *, [data-testid="stRadio"] label * {
+  white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+[data-testid="stCheckbox"] label { align-items:flex-start; padding: 6px 0; }
+/* ---- page atmosphere ---- */
+[data-testid="stApp"] {
+  background-image:
+    radial-gradient(1200px 500px at 8% -10%, rgba(34,197,94,.13), transparent 60%),
+    radial-gradient(900px 420px at 100% 0%, rgba(161,98,7,.07), transparent 55%);
+  background-attachment: fixed;
+}
+::selection { background:#BBF7D0; color:#14532D; }
+[data-testid="stMain"] { scroll-behavior:smooth; scroll-timeline: --lgpage block; scrollbar-color:#86EFAC transparent; }
+[data-testid="stMain"]::-webkit-scrollbar { width:10px; }
+[data-testid="stMain"]::-webkit-scrollbar-thumb { background:#86EFAC; border-radius:10px; border:2px solid #F0FDF4; }
+
+/* ---- reading progress bar + back-to-top (driven by the page scroll) ---- */
+.lg-scrollbar { position:fixed; top:0; left:0; right:0; height:4px; z-index:1000000; transform-origin:0 50%;
+  background:linear-gradient(90deg,#15803D,#22C55E,#A16207); transform:scaleX(0); pointer-events:none; }
+.lg-totop { position:fixed; right:22px; bottom:22px; z-index:999999; width:48px; height:48px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center; background:#15803D; color:#fff !important;
+  box-shadow:0 10px 24px -10px rgba(21,128,61,.7); text-decoration:none !important; opacity:0; pointer-events:none;
+  transition: transform .2s ease, background .2s ease; }
+.lg-totop:hover { transform: translateY(-3px); background:#166534; }
+@supports (animation-timeline: scroll()) {
+  .lg-scrollbar { animation: lgprog linear both; animation-timeline: --lgpage; }
+  .lg-totop { animation: lgshow linear both; animation-timeline: --lgpage; animation-range: 0px 400px; }
+}
+@keyframes lgprog { to { transform:scaleX(1); } }
+@keyframes lgshow { 0%,60% { opacity:0; pointer-events:none; transform:translateY(12px); }
+                    100% { opacity:1; pointer-events:auto; transform:none; } }
+
+/* ---- scroll reveal: cards, tiles and photos slide in as they enter the screen ---- */
+@supports (animation-timeline: view()) {
+  .lg-card, .lg-stat, .lg-feature, [data-testid="stImage"], [data-testid="stVegaLiteChart"], [data-testid="stDataFrame"] {
+    animation: lgreveal linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+}
+@keyframes lgreveal { from { opacity:0; transform: translateY(28px) scale(.98); } to { opacity:1; transform:none; } }
+
+/* ---- hover: lift, glow, zoom ---- */
+.lg-card, .lg-stat, .lg-feature, .lg-step { transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease, border-color .25s ease; }
+.lg-card:hover, .lg-stat:hover, .lg-feature:hover { transform: translateY(-4px);
+  box-shadow: 0 2px 4px rgba(20,83,45,.06), 0 18px 36px -18px rgba(20,83,45,.45); border-color:#4ADE80; }
+.lg-step:hover { transform: translateY(-2px); box-shadow:0 10px 22px -16px rgba(20,83,45,.5); }
+.lg-verdict { transition: transform .25s ease, box-shadow .25s ease; }
+.lg-verdict:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -20px rgba(0,0,0,.35); }
+.lg-chip { transition: transform .15s ease, box-shadow .15s ease; }
+.lg-chip:hover { transform: translateY(-1px); box-shadow: 0 4px 10px -6px rgba(0,0,0,.35); }
+[data-testid="stImage"] { border-radius:14px; overflow:hidden; }
+[data-testid="stImage"] img { transition: transform .45s cubic-bezier(.2,.8,.2,1), filter .3s ease; }
+[data-testid="stImage"]:hover img { transform: scale(1.04); filter: saturate(1.08); }
+.lg-checks li { transition: background .15s ease, padding .15s ease; border-radius:10px; }
+.lg-checks li:hover { background:#F0FDF4; padding-left:8px; padding-right:8px; }
+
+/* buttons: light sweep on the primary action */
+[data-testid="stBaseButton-primary"] { position:relative; overflow:hidden; }
+[data-testid="stBaseButton-primary"]::after { content:""; position:absolute; inset:0; transform:translateX(-120%);
+  background:linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%); transition: transform .7s ease; }
+[data-testid="stBaseButton-primary"]:hover::after { transform:translateX(120%); }
+[data-testid="stBaseButton-secondary"]:hover { border-color:#15803D !important; color:#15803D !important; background:#F0FDF4 !important; }
+
+/* sidebar links, tabs, uploader, expanders */
+[data-testid="stSidebar"] a { transition: transform .18s ease, background .18s ease; border-radius:10px; }
+[data-testid="stSidebar"] a:hover { transform: translateX(4px); background:#DCFCE7 !important; }
+[data-baseweb="tab"] { border-radius:10px 10px 0 0; transition: background .18s ease; padding: 0 10px !important; }
+[data-baseweb="tab"]:hover { background:#DCFCE7; }
+[data-testid="stFileUploaderDropzone"] { border:2px dashed #86EFAC !important; background:#FFFFFF !important;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease; }
+[data-testid="stFileUploaderDropzone"]:hover { border-color:#15803D !important; background:#F0FDF4 !important; transform: scale(1.005); }
+[data-testid="stExpander"] details { transition: box-shadow .2s ease, border-color .2s ease; }
+[data-testid="stExpander"] details:hover { border-color:#4ADE80; box-shadow:0 8px 20px -16px rgba(20,83,45,.5); }
+
+/* ---- header: floating badge and drifting leaves ---- */
+.lg-head { position:relative; }
+.lg-head .badge { animation: lgfloat 5s ease-in-out infinite; background: linear-gradient(135deg,#15803D,#22C55E 60%,#15803D);
+  background-size:200% 200%; }
+@keyframes lgfloat { 0%,100% { transform: translateY(0); background-position:0% 50%; }
+                     50% { transform: translateY(-4px); background-position:100% 50%; } }
+.lg-leaves { position:absolute; inset:-10px 0 auto auto; width:260px; height:90px; pointer-events:none; opacity:.55; }
+.lg-leaves svg { position:absolute; animation: lgdrift 9s ease-in-out infinite; }
+.lg-leaves svg:nth-child(1) { right:30px; top:4px; }
+.lg-leaves svg:nth-child(2) { right:120px; top:36px; animation-duration:11s; animation-delay:-3s; }
+.lg-leaves svg:nth-child(3) { right:200px; top:8px; animation-duration:13s; animation-delay:-6s; }
+@keyframes lgdrift { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-10px,8px) rotate(18deg); } }
+@media (max-width: 760px) { .lg-leaves { display:none; } }
+
+/* ---- staged entrance: safety stages light up one after another ---- */
+.lg-steps .lg-step { animation: lgstep .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 140ms); }
+@keyframes lgstep { from { opacity:0; transform: translateY(10px) scale(.96); } to { opacity:1; transform:none; } }
+.lg-step.stop .n { animation: lgstep .5s both, lgring 1.6s ease-out 1 calc(var(--i,0) * 140ms + 400ms); }
+@keyframes lgring { 0% { box-shadow: 0 0 0 0 rgba(220,38,38,.45); } 100% { box-shadow: 0 0 0 14px rgba(220,38,38,0); } }
+
+/* check marks draw themselves */
+.lg-draw path, .lg-draw circle { stroke-dasharray: 70; stroke-dashoffset: 70;
+  animation: lgdrawin .7s ease-out forwards; animation-delay: calc(var(--d, 0) * 90ms + 200ms); }
+@keyframes lgdrawin { to { stroke-dashoffset: 0; } }
+.lg-checks li { animation: lgfade .4s ease-out both; animation-delay: calc(var(--d, 0) * 70ms); }
+
+/* ---- verdict icon personality ---- */
+.lg-verdict { animation: lgpop .5s cubic-bezier(.2,1.2,.3,1) both; }
+@keyframes lgpop { from { opacity:0; transform: translateY(10px) scale(.97); } to { opacity:1; transform:none; } }
+.lg-v-healthy .ib { animation: lgbreathe 3.2s ease-in-out infinite; }
+@keyframes lgbreathe { 0%,100% { box-shadow:0 0 0 0 rgba(21,128,61,.0); } 50% { box-shadow:0 0 0 8px rgba(21,128,61,.12); } }
+.lg-v-diseased .ib { animation: lgpulse 1.8s ease-out 3; }
+@keyframes lgpulse { 0% { box-shadow:0 0 0 0 rgba(234,88,12,.45); } 100% { box-shadow:0 0 0 16px rgba(234,88,12,0); } }
+.lg-v-uncertain .ib svg { animation: lgwobble 1.2s ease-in-out 2; transform-origin:50% 60%; }
+@keyframes lgwobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+.lg-v-not_a_leaf .ib { animation: lgshake .5s ease-in-out 2; }
+@keyframes lgshake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.lg-v-retake .ib svg { animation: lgflash 1.4s ease-in-out 2; }
+@keyframes lgflash { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+
+/* ---- numbers count up ---- */
+@property --lgn { syntax: '<integer>'; initial-value: 0; inherits: false; }
+.lg-count { --lgn: var(--to); counter-reset: lgn var(--lgn); animation: lgcount 1.3s cubic-bezier(.2,.8,.2,1); }
+.lg-count::after { content: counter(lgn); }
+@keyframes lgcount { from { --lgn: 0; } }
+
+/* ---- feature strip on the start screen ---- */
+.lg-features { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px; margin: 6px 0 16px 0; }
+.lg-feature { background:#fff; border:1px solid #BBF7D0; border-radius:18px; padding:16px; position:relative; overflow:hidden; }
+.lg-feature .fi { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  background:#DCFCE7; color:#15803D; margin-bottom:10px; transition: transform .3s cubic-bezier(.2,1.4,.3,1); }
+.lg-feature:hover .fi { transform: rotate(-8deg) scale(1.1); }
+.lg-feature b { display:block; font-family: Lora, serif; font-size:1.05rem; margin-bottom:4px; color:#14532D; }
+.lg-feature span { color:#475569; font-size:.9rem; line-height:1.45; }
+.lg-feature::before { content:""; position:absolute; inset:auto -40px -40px auto; width:110px; height:110px; border-radius:50%;
+  background: radial-gradient(circle, rgba(34,197,94,.16), transparent 70%); transition: transform .4s ease; }
+.lg-feature:hover::before { transform: scale(1.6); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+  .lg-totop { opacity:1; pointer-events:auto; }
+  .lg-draw path, .lg-draw circle { stroke-dashoffset: 0; }
+}
+</style>"""
+
+_LEAF_SVG = ('<svg width="{s}" height="{s}" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="1.6" '
+             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + _P["leaf"] + '</svg>')
+
+
+def _no_blank_lines(css):
+    # Streamlit's Markdown ends an HTML block at a blank line, which would drop the rest of the <style>
+    return "\n".join(line for line in css.splitlines() if line.strip())
+
 
 def apply():
-    st.markdown(CSS, unsafe_allow_html=True)
+    # one single <style> block: Streamlit keeps only the first <style> in a Markdown element
+    css = CSS.replace("</style>", "") + MOTION_CSS.replace("<style>", "")
+    st.markdown(_no_blank_lines(css) + "<div id='lg-top'></div><div class='lg-scrollbar' aria-hidden='true'></div>"
+                f"<a class='lg-totop' href='#lg-top' aria-label='Back to top'>{icon('chevron_up', 22, '#fff', 2.6)}</a>",
+                unsafe_allow_html=True)
 
 
 def sidebar():
@@ -185,7 +340,10 @@ def sidebar():
         for path, label, ic in [("app.py", "Diagnose", ":material/eco:"),
                                 ("pages/1_Deep_Check.py", "Deep Check", ":material/biotech:"),
                                 ("pages/2_Fool_Me_Arena.py", "Fool Me Arena", ":material/target:"),
-                                ("pages/3_Live_Camera.py", "Live Camera", ":material/videocam:")]:
+                                ("pages/3_Live_Camera.py", "Live Camera", ":material/videocam:"),
+                                ("pages/4_Treatment_Plan.py", "Treatment Plan", ":material/healing:"),
+                                ("pages/5_Field_Scan.py", "Field Scan", ":material/grid_view:"),
+                                ("pages/6_Field_Diary.py", "Field Diary", ":material/menu_book:")]:
             try:
                 st.page_link(path, label=label, icon=ic)
             except Exception:  # e.g. when a page is run on its own
@@ -196,7 +354,8 @@ def sidebar():
 # ---------------------------------------------------------------- components
 def header(title, subtitle, ic="leaf", eyebrow=None):
     eb = f"<div class='lg-eyebrow'>{html.escape(eyebrow)}</div>" if eyebrow else ""
-    st.markdown(f"<div class='lg-head'><div class='badge'>{icon(ic, 26, '#fff')}</div>"
+    leaves = "<div class='lg-leaves' aria-hidden='true'>" + "".join(_LEAF_SVG.format(s=sz) for sz in (34, 24, 18)) + "</div>"
+    st.markdown(f"<div class='lg-head'>{leaves}<div class='badge'>{icon(ic, 26, '#fff')}</div>"
                 f"<div>{eb}<h1>{html.escape(title)}</h1><p>{html.escape(subtitle)}</p></div></div>",
                 unsafe_allow_html=True)
 
@@ -223,7 +382,7 @@ def verdict_card(verdict, headline, lines=(), label="LeafGuard says", footnotes=
     st.markdown(
         f"<div class='lg-verdict lg-fade' role='status' aria-live='polite' "
         f"style='background:{bg};color:{fg};border-color:{border}'>"
-        f"<div class='row'><div class='ib'>{icon(ic, 26, fg, 2.2)}</div><div style='flex:1'>"
+        f"<div class='row lg-v-{verdict.lower()}'><div class='ib'>{icon(ic, 26, fg, 2.2)}</div><div style='flex:1'>"
         f"<div style='display:flex;gap:8px;align-items:center;flex-wrap:wrap'>"
         f"<span class='lg-eyebrow' style='color:{fg}'>{html.escape(label)}</span>{status_chip(verdict)}</div>"
         f"<div class='title'>{html.escape(headline)}</div></div></div>"
@@ -243,12 +402,13 @@ def raw_card(answer, detail, note="Answers every photo, even a mug or a blurry s
 
 def checks_list(checks, title="Safety checks"):
     rows = ""
-    for c in checks:
+    for k, c in enumerate(checks):
         ok = c["passed"]
         ic = icon("check_circle" if ok else "x_circle", 20, "#15803D" if ok else "#B91C1C", 2.2,
-                  label="passed" if ok else "failed")
-        rows += (f"<li>{ic}<span class='nm'>{html.escape(c['name'])}</span>"
-                 f"<span class='val'>{html.escape(str(c['value']))}</span></li>")
+                  label="passed" if ok else "failed").replace("class='lg-ico'", "class='lg-ico lg-draw'").replace(
+                  'class="lg-ico"', 'class="lg-ico lg-draw"')
+        rows += (f"<li style='--d:{k}'>{ic}<span class='nm'>{html.escape(c['name'])}"
+                 f"<span class='val'>{html.escape(str(c['value']))}</span></span></li>")
     st.markdown(f"<div class='lg-card'><h3>{html.escape(title)}</h3><ul class='lg-checks'>{rows}</ul></div>",
                 unsafe_allow_html=True)
 
@@ -291,19 +451,46 @@ def pipeline_steps(result):
             stopped = True
         mark = {"done": icon("check", 16, "#14532D", 3), "stop": icon("x", 16, "#991B1B", 3),
                 "warn": icon("alert", 15, "#854D0E", 2.6), "todo": str(i + 1)}[st_]
-        html_steps += (f"<div class='lg-step {st_}'><div class='n'>{mark}</div>"
+        if st_ == "done":
+            mark = mark.replace('class="lg-ico"', f'class="lg-ico lg-draw" style="--d:{i * 1.6}"')
+        html_steps += (f"<div class='lg-step {st_}' style='--i:{i}'><div class='n'>{mark}</div>"
                        f"<div><div class='t'>{name}</div><div class='s'>{html.escape(sub)}</div></div></div>")
     st.markdown(f"<div class='lg-steps' aria-label='LeafGuard safety stages'>{html_steps}</div>", unsafe_allow_html=True)
+
+
+def _counting(value):
+    """'52%' or '7' -> an animated count-up (screen readers get the real value)."""
+    import re
+    m = re.fullmatch(r"(\d{1,4})(%?)", str(value).strip())
+    if not m:
+        return html.escape(str(value))
+    return (f"<span role='img' aria-label='{m.group(1)}{m.group(2)}'><span class='lg-count' style='--to:{m.group(1)}'>"
+            f"</span>{m.group(2)}</span>")
 
 
 def stat(value, label, tone="neutral", ic=None):
     bg, fg = TONES[tone]
     i = f"<div style='margin-bottom:6px'>{icon(ic, 20, fg)}</div>" if ic else ""
     return (f"<div class='lg-stat' style='background:{bg};border-color:{fg}22'>{i}"
-            f"<div class='v' style='color:{fg}'>{html.escape(str(value))}</div>"
+            f"<div class='v' style='color:{fg}'>{_counting(value)}</div>"
             f"<div class='l'>{html.escape(label)}</div></div>")
 
 
 def card(title, body_html, ic=None):
     i = icon(ic, 18, C["primary"]) + " " if ic else ""
     st.markdown(f"<div class='lg-card'><h3>{i}{html.escape(title)}</h3>{body_html}</div>", unsafe_allow_html=True)
+
+
+def features(items):
+    """Feature strip: [(icon, title, text), ...] - hover to animate."""
+    cards = "".join(f"<div class='lg-feature'><div class='fi'>{icon(ic, 22, '#15803D')}</div>"
+                    f"<b>{html.escape(t)}</b><span>{html.escape(x)}</span></div>" for ic, t, x in items)
+    st.markdown(f"<div class='lg-features'>{cards}</div>", unsafe_allow_html=True)
+
+
+def link(page, label, ic=None, **kw):
+    """st.page_link that never crashes (e.g. when a page is opened on its own)."""
+    try:
+        st.page_link(page, label=label, icon=ic or kw.get("icon"))
+    except Exception:
+        pass
