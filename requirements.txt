@@ -1,3 +1,6 @@
+# CPU-only PyTorch (much smaller; needed for Streamlit Cloud, harmless on Windows)
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # Core
 numpy
 opencv-python
@@ -5,11 +8,13 @@ pillow
 pandas
 streamlit>=1.50
 
-# Your YOLO model (best.pt) - also installs torch
+# Our YOLO model (best.pt) - also installs torch
 ultralytics
 
-# "Is it a leaf?" check with CLIP (downloads ~600 MB once, then works offline)
+# "Is it a leaf?" check with CLIP (downloads ~600 MB once)
 transformers
 
-# Only for model.pt (old YOLOv5 repo format): also needs your Yolov5 folder, see README
+# Spoken results in Kannada / Hindi / English
+gTTS
+
 # Only for Keras / ONNX classifiers:  pip install tensorflow   /   pip install onnxruntime

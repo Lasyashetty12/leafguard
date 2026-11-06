@@ -16,9 +16,10 @@ st.set_page_config(page_title="LeafGuard · Diagnose", page_icon=":material/eco:
 ui.apply()
 
 
-@st.cache_resource(show_spinner="Loading your model and the safety layer ...")
 def get_guard(cfg_json):
-    return LeafGuard(json.loads(cfg_json))
+    # Shared with the other pages, so the model + CLIP are loaded only ONCE (matters on Streamlit Cloud's memory limit)
+    from leafguard_plus.shared import _load
+    return _load(cfg_json)
 
 
 cfg = load_config(os.path.join(ROOT, "config.json"))
