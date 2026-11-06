@@ -98,8 +98,6 @@ with tab_diag:
     if rgb is not None:
         with st.spinner("Checking photo, finding leaf, asking the model, explaining ..."):
             r = guard.analyze(rgb, do_explain=explain_on, explain_baseline=explain_on and compare_on)
-        from leafguard_plus.shared import remember_diagnosis
-        remember_diagnosis(r, rgb)
 
         ui.pipeline_steps(r)
 
@@ -157,11 +155,8 @@ with tab_diag:
             cols = st.columns(2, gap="small")
             for k, (cap, im) in enumerate(imgs):
                 cols[k % 2].image(im, caption=cap, width="stretch")
-        if r["verdict"] == "DISEASED":
-            ui.link("pages/4_Treatment_Plan.py", "Get the treatment plan: what to do today, options, "
-                         "spray-weather check", ":material/healing:")
         if r["verdict"] in ("UNCERTAIN", "DISEASED"):
-            ui.link("pages/1_Deep_Check.py", "Open Deep Check: self-doubt test, proof, severity and voice", ":material/biotech:")
+            st.page_link("pages/1_Deep_Check.py", label="Open Deep Check: self-doubt test, proof, severity and voice", icon=":material/biotech:")
 
 # ---------------------------------------------------------------- proof
 with tab_proof:

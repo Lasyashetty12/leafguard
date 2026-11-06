@@ -59,24 +59,3 @@ def photo_input(key, allow_samples=True):
 def card(verdict, headline, lines, label="LeafGuard says", extra_html=""):
     """Verdict card in the design system (icon + status word + colour)."""
     ui.verdict_card(verdict, headline, lines, label=label)
-
-
-# ---------------------------------------------------------------- hand-off between pages
-def remember_diagnosis(result, rgb=None, sev=None, verdict=None):
-    """Keep the latest diagnosis so Treatment Plan / Field Diary can pick it up (same browser session)."""
-    v = verdict or result.get("verdict")
-    st.session_state["lg_last"] = {
-        "verdict": v, "cls": result.get("cls"), "label": result.get("label"),
-        "confidence": result.get("confidence"),
-        "severity": None if not sev else sev.get("percent"), "level": None if not sev else sev.get("level"),
-        "thumb": None if rgb is None else _thumb(rgb),
-    }
-
-
-def last_diagnosis():
-    return st.session_state.get("lg_last")
-
-
-def _thumb(rgb, side=360):
-    s = min(1.0, side / max(rgb.shape[:2]))
-    return cv2.resize(rgb, None, fx=s, fy=s, interpolation=cv2.INTER_AREA) if s < 1 else rgb

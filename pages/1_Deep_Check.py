@@ -8,7 +8,7 @@ import streamlit.components.v1 as components
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from leafguard_plus import counterfactual, report, severity, stability, ui  # noqa: E402
 from leafguard_plus.i18n import LANGS, disease_name, farmer_message  # noqa: E402
-from leafguard_plus.shared import get_guard, photo_input, remember_diagnosis, setup_page  # noqa: E402
+from leafguard_plus.shared import get_guard, photo_input, setup_page  # noqa: E402
 from leafguard_plus.voice import browser_speak_html, tts_mp3  # noqa: E402
 
 setup_page("Deep Check", ":material/biotech:")
@@ -57,7 +57,6 @@ with st.status("Running the deep check ...", expanded=False) as status_box:
             st.write("Proof test: hiding the spots ...")
             cf = counterfactual.what_would_change_my_mind(guard, rgb, r, sev)
     status_box.update(label="Deep check complete", state="complete")
-remember_diagnosis(r, rgb, sev, verdict=final)
 
 ui.pipeline_steps(dict(r, verdict=final))
 
@@ -86,9 +85,6 @@ with left:
                                    {"mild": "good", "moderate": "warn", "severe": "bad"}[sev["level"]], "gauge"))
     if proof_chips:
         st.markdown(" ".join(proof_chips), unsafe_allow_html=True)
-    if final == "DISEASED":
-        ui.link("pages/4_Treatment_Plan.py", "Get the treatment plan & spray-weather check",
-                     icon=":material/healing:")
     if do_voice:
         st.markdown(f"<div style='margin-top:12px;font-weight:600'>{ui.icon('volume', 18, '#15803D')} "
                     f"Listen to the result</div>", unsafe_allow_html=True)
